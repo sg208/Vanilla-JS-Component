@@ -111,6 +111,13 @@ function loadWfpkPlugin({
     }
   `;
 
+  // Append <style>, last one to render --------------------
+  setTimeout(function() {
+    const innerStyle = createEl('style');
+    innerStyle.innerHTML = styles;
+    component.appendChild(innerStyle);
+  }, 1)
+
   // Base template -----------------------------------------
   component.innerHTML = `
     <h2>Hello ${name}</h2>
@@ -175,11 +182,6 @@ function loadWfpkPlugin({
   document
     .querySelector('.wfpk-providers-default')
     .addEventListener('click', openProviders);
-
-  // Append <style> to target container ------------------------
-  const innerStyle = createEl('style');
-  innerStyle.innerHTML = styles;
-  component.appendChild(innerStyle);
 
   return component;
 }
