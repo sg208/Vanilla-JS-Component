@@ -188,6 +188,7 @@ function loadWfpkPlugin({
     });
 
     // Create an overlay el to enable user to click outside the dropdown
+    // If false, dropdown will be closed on selected only
     if (enableCloseOutsideElement) {
       const overlay = createEl('div');
       overlay.className = 'wfpk-overlay';
@@ -214,4 +215,5 @@ loadWfpkPlugin({
     primary: '#cc0000',
     secondary: '#666666',
   },
+  // enableCloseOutsideElement = true >>>>> optional config
 });
