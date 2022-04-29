@@ -29,14 +29,12 @@ function loadWfpkPlugin({
   data = {
     providers: providers,
   },
+  enableCloseOutsideElement = true,
 }) {
-  // Target element #id to load this component to
+  // Target element #id to load this component to ----------------
   const component = document.querySelector(targetEl);
 
-  const createEl = (tag) => {
-    return document.createElement(tag);
-  };
-
+  // Declare all the styles here ---------------------------------
   const styles = `
    ${targetEl} {
      font-family: "Tahoma", Verdana;
@@ -94,6 +92,11 @@ function loadWfpkPlugin({
       border-radius: 0.5rem;
       cursor: pointer;
     }
+    ${targetEl} .wfpk-selected {
+      outline: 2px solid ${colors.primary};
+      font-weight: bold;
+      color: ${colors.primary};
+    }
     ${targetEl} .wfpk-overlay {
       position: fixed;
       height: 100vh;
@@ -103,20 +106,28 @@ function loadWfpkPlugin({
       left: 0;
       opacity: 0.99;
     }
-
-    ${targetEl} .wfpk-selected {
-      outline: 2px solid ${colors.primary};
-      font-weight: bold;
-      color: ${colors.primary};
+    ${targetEl} .wfpk-overlay {
+      position: fixed;
+      height: 100vh;
+      width: 100vh;
+      z-index: 100000000;
+      top: 0;
+      left: 0;
+      opacity: 0.99;
     }
   `;
 
   // Append <style>, last one to render --------------------
-  setTimeout(function() {
+  setTimeout(function () {
     const innerStyle = createEl('style');
     innerStyle.innerHTML = styles;
     component.appendChild(innerStyle);
-  }, 1)
+  }, 1);
+
+  // Reusable function to create el -----------------------
+  const createEl = (tag) => {
+    return document.createElement(tag);
+  };
 
   // Base template -----------------------------------------
   component.innerHTML = `
@@ -126,7 +137,6 @@ function loadWfpkPlugin({
       <div class="wfpk-providers">
        <div class="wfpk-providers-default">Please select one...</div>
       </div>
-      
     </form>
   `;
 
@@ -135,7 +145,9 @@ function loadWfpkPlugin({
     document.querySelector(
       '.wfpk-providers-default'
     ).textContent = `${item} is selected`;
-    document.querySelector('.wfpk-providers-default').classList.add('wfpk-selected')
+    document
+      .querySelector('.wfpk-providers-default')
+      .classList.add('wfpk-selected');
   }
 
   // Append payment providers dropdown ----------------------
@@ -143,17 +155,21 @@ function loadWfpkPlugin({
   paymentProvidersList.className = 'wfpk-payment-providers';
   paymentProvidersList.innerHTML = data.providers
     .map((item) => {
-      return `<li id="${item.id}">${item.name}</li>`;
+      return `<li role="option" id="${item.id}">${item.name}</li>`;
     })
     .join('');
 
+  // Remove the dropdown ----------------------------------
   function removeProviders() {
     const elements = document.querySelectorAll(
-      '.wfpk-payment-providers, .wfpk-overlay'
+      `.wfpk-payment-providers ${
+        enableCloseOutsideElement ? ', .wfpk-overlay' : ''
+      }`
     );
     elements.forEach((item) => item.remove());
   }
 
+  // Open the dropdown --------------------------------------
   function openProviders() {
     document.querySelector('.wfpk-providers').appendChild(paymentProvidersList);
 
@@ -171,14 +187,18 @@ function loadWfpkPlugin({
         });
     });
 
-    const overlay = createEl('div');
-    overlay.className = 'wfpk-overlay';
-    component.appendChild(overlay);
-    document
-      .querySelector('.wfpk-overlay')
-      .addEventListener('click', removeProviders);
+    // Create an overlay el to enable user to click outside the dropdown
+    if (enableCloseOutsideElement) {
+      const overlay = createEl('div');
+      overlay.className = 'wfpk-overlay';
+      component.appendChild(overlay);
+      document
+        .querySelector('.wfpk-overlay')
+        .addEventListener('click', removeProviders);
+    }
   }
 
+  // Event listener to open the drowdown --------------------
   document
     .querySelector('.wfpk-providers-default')
     .addEventListener('click', openProviders);
@@ -186,6 +206,7 @@ function loadWfpkPlugin({
   return component;
 }
 
+// =========================================
 loadWfpkPlugin({
   targetEl: '#WfpkApp',
   name: 'Tom',
